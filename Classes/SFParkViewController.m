@@ -83,13 +83,16 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 	lowMemoryMode = NO;
 	veryLowMemoryMode = NO;
 	//Live data source
-	serviceURL = @"http://api.sfpark.org/sfpark/rest/availabilityservice?radius=2.0&response=json&pricing=yes&version=1.3";
+	serviceURL = @"http://api.sfpark.org/sfpark/rest/availabilityservice?radius=2.0&response=json&pricing=yes&version=1.4";
+	
+	//v1.4 test harness url
+	//serviceURL = @"http://api.sfpark.org/sfparkTestData.json";
 	
 	//Sunday url
-	//serviceURL = @"http://b4.sfpark.org/staticdata/availability-WeekEnd-Sun-0859AM.json";
+	//serviceURL = @"http://sfpark.org/staticdata/availability-WeekEnd-Sun-0859AM.json";
 	
 	//Test harness url
-	//serviceURL = @"http://b4.sfpark.org/staticdata/testharness.json";
+	//serviceURL = @"http://sfpark.org/staticdata/testharness.json";
     	
 	//Map setup
 	MKCoordinateRegion region;
@@ -183,6 +186,7 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 	[availabilityButton setImage:buttonImage forState:(UIControlStateHighlighted|UIControlStateSelected)];
 	UIImage *priceImage = [UIImage imageNamed:@"button_pricing_up"];
 	[self.priceButton setImage:priceImage forState:UIControlStateSelected|UIControlStateNormal|UIControlStateHighlighted];
+  [Flurry logEvent:@"Availability_Mode_Shown"];
 }
 
 // Switch on Pricing mode
@@ -205,10 +209,12 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 	[self.priceButton setImage:priceImage forState:UIControlStateSelected|UIControlStateNormal|UIControlStateHighlighted];
 	UIImage *buttonImage = [UIImage imageNamed:@"button_availability_up"];
 	[availabilityButton setImage:buttonImage forState:(UIControlStateHighlighted|UIControlStateSelected)];
+  [Flurry logEvent:@"Pricing_Mode_Shown"];
 }
 
 // Refresh the data from the server.
 - (IBAction) refresh: (id)sender{
+  [Flurry logEvent:@"Refresh_Button_Pressed"];
 	double gpsSpeed = 0.0;
 	ageOfData.text =  [NSString stringWithFormat:@"%5.2fMPH",gpsSpeed];
 	[self hideAllActivityIndicators];
@@ -221,6 +227,7 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 // Reload the data on a shake event.
 - (void) motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event{
 	if (event.subtype == UIEventSubtypeMotionShake){
+    [Flurry logEvent:@"Shaken_To_Refresh"];
 		[self hideAllActivityIndicators];
 		HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
 		HUD.labelText = @"Shaken. Refreshing data.";
@@ -270,11 +277,24 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 								[[request responseHeaders] objectForKey:@"Content-Length"],
 								(contentlength / (-howLong))];
 	*/
+//	uint64_t startTime = mach_absolute_time( );
 	NSError *error;
     // TODO: Profile other json parsers and see if there's an appreciable speedup.
 	SBJSON *json = [SBJSON new];
+	/* SBJSON parser on next line */
 	NSDictionary * dObj = [json objectWithString:[request responseString] error:&error];
+	/* NSJSON parser below */
+//	NSMutableDictionary* dObj = [NSJSONSerialization
+//												JSONObjectWithData: [request responseData]
+//												options:NSJSONReadingMutableContainers | NSJSONReadingMutableLeaves
+//												error:&error];
+
 	//self.returnData = [json objectWithString:[request responseString] error:&error];
+	
+//	uint64_t endTime = mach_absolute_time( );
+//	uint64_t elapsedTime = endTime - startTime;
+//	NSLog(@"%llu < elapsed parsing time",elapsedTime);
+	
 	self.returnData = dObj;
 	[json release];
 	
@@ -303,6 +323,7 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 
 - (void) displayData{
 	stillLoading = YES;
+	[self hideAllActivityIndicators];
 	if (self.returnData == nil){
 		label.text = @"Data parsing failed";
 		[self hideAllActivityIndicators];
@@ -403,12 +424,12 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated{
 	if (stillDisplayingIntroView)
 		return;
-
-	if ( !displayingDetails && !lowMemoryMode && [self inClose]){
-		HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-		HUD.labelText = @"Processing detailed display.";
-		[self performSelector:@selector(displayData) withObject:nil afterDelay:0];
-	}
+//	 NOTE: (For newer devices, avoiding this forced re-draw speeds up the experience dramatically.)
+//	if ( !displayingDetails && !lowMemoryMode && [self inClose]){
+//		HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+//		HUD.labelText = @"Processing detailed display.";
+//		[self performSelector:@selector(displayData) withObject:nil afterDelay:0];
+//	}
 }
 
 
@@ -587,10 +608,10 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 	pointOfInterestIcon = (MKAnnotationView *)[mapView dequeueReusableAnnotationViewWithIdentifier:defaultID];
 	if ( pointOfInterestIcon == nil ){
 		pointOfInterestIcon = [[[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:defaultID] autorelease];
-        UIButton *rightButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
-        [rightButton addTarget:self action:@selector(showDetails:) forControlEvents:UIControlEventTouchUpInside];
-        pointOfInterestIcon.rightCalloutAccessoryView = rightButton;
-        pointOfInterestIcon.canShowCallout = YES;
+    UIButton *rightButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+    [rightButton addTarget:self action:@selector(showDetails:) forControlEvents:UIControlEventTouchUpInside];
+    pointOfInterestIcon.rightCalloutAccessoryView = rightButton;
+    pointOfInterestIcon.canShowCallout = YES;
 	}
 
 	int itemImageName;
@@ -609,6 +630,14 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 // Load up another view with the details of the currently selected garage or street.
 - (IBAction) showDetails:(UIView *)sender{
 	MyAnnotation* currentSelection = (MyAnnotation*)sender.tag;
+
+  NSString * detailsString;
+  detailsString = [NSString stringWithFormat:@"Show_Details_%@",currentSelection.title];
+  NSLog(@"showDetails sender:%@",detailsString);
+  NSDictionary *locationDetails =
+  [NSDictionary dictionaryWithObjectsAndKeys:currentSelection.title, @"Details for",nil];
+
+  [Flurry logEvent: @"Show_Details" withParameters:locationDetails];
 	GarageDetailsViewController *garageDetailsViewController = [[GarageDetailsViewController alloc] initWithNibName:@"GarageDetailsView" bundle:[NSBundle mainBundle]];
 	garageDetailsViewController.delegate = self;
 	garageDetailsViewController.thisGarage = currentSelection;

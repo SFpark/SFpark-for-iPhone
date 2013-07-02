@@ -26,7 +26,7 @@
 #import "MyAnnotation.h"
 
 
-#define invalid_garage              0
+#define garage_invalid              0
 #define street_invalid              1
 #define garage_availability_high    2
 #define street_availability_high    3
@@ -64,7 +64,7 @@
 }
 
 - (id)initWithData:(NSDictionary *) element andLocation:(CLLocationCoordinate2D ) location{
-    self = [super init];
+  self = [super init];
 	if (self){
 		if ([element objectForKey:@"BFID"]) {
 			uniqueID = [element objectForKey:@"BFID"];
@@ -122,6 +122,14 @@
 		if (numberOfOccupiedSpaces > numberOfOperationalSpaces) {
 			//descriptionOfAvailability = @"occ is > than oper (debg code for 'no data')";
 			descriptionOfAvailability = @"";
+			// v1.4 change. (When there is a garage reporting more occupied spaces than available spaces, the
+			// garage is in "valet" mode and shall be considered full. This change 'undefines' the previous
+			// meaning, of 'no data'.)
+			// 'On the map garage call out boxes, if the number of spaces occupied exceeds the number of
+			// spaces available, change "Estimated ___ of ___ spaces available" to "Full".'
+			if (!onStreet){
+				descriptionOfAvailability = @"Full";
+			}
 		} else if (numberOfOperationalSpaces == 0 && numberOfOccupiedSpaces == 0) {
 			descriptionOfAvailability = @"Restricted";
 		} else {
@@ -140,6 +148,17 @@
 	double usedpercent;
 	BOOL invalidData = YES;
 	
+	//v1.4 change. Force invalid iconography if returns are < 0. (Out of band return value indicating known bad data, or otherwise invalid data)
+	if(!showPrice  && occupied < 0){
+		//NSLog(@"onStreet and number of operationalspaces < 0. %d %@",occupied,[allGarageData description]);
+		if (onStreet) {
+			return street_invalid;
+		}else{
+			return garage_invalid;
+		}
+
+	}
+	
 	if (numberOfOperationalSpaces == 0) {
 		usedpercent = 0.0;
 		invalidData = YES;
@@ -148,7 +167,7 @@
 		invalidData = NO;
 	}
 	if (invalidData) {
-		itemImageName = invalid_garage;
+		itemImageName = garage_invalid;
 		if(onStreet){
 			itemImageName = street_invalid;
 			if(numberOfOperationalSpaces == 0 && occupied == 0 && ! showPrice){
@@ -158,15 +177,30 @@
 				return street_availability_low;
 			}
 		}
-	} else if (usedpercent >= 0.00 && usedpercent < 0.70) {
-		itemImageName = garage_availability_high;
-		if(onStreet) itemImageName = street_availability_high;
-	} else if(usedpercent >= 0.70 && usedpercent <= 0.85){
-		itemImageName = garage_availability_medium;
-		if(onStreet) itemImageName = street_availability_medium;
-	} else if (usedpercent > 0.85) {
-		itemImageName = garage_availability_low;
-		if(onStreet) itemImageName = street_availability_low;
+	}
+	//v1.4 change. Garage's coloration buckets are now going to be 0-10,10-30, >30.
+	//		Street parking shall stay colored at 0-15, 15-30, >30.
+	//"On the map, change GARAGE occupancy display rules to the following:
+	//0-10%  = red
+	//10-30% = dark blue
+	//> 30% = light blue (same as current)"
+	if(onStreet){
+		// street bucket breaks here
+		if (usedpercent >= 0.00 && usedpercent < 0.70) {
+			itemImageName = street_availability_high;
+		} else if(usedpercent >= 0.70 && usedpercent <= 0.85){
+			itemImageName = street_availability_medium;
+		} else if (usedpercent > 0.85) {
+			itemImageName = street_availability_low;
+		}
+	} else { // Garage buckets
+		if (usedpercent >= 0.00 && usedpercent < 0.70) {
+			itemImageName = garage_availability_high;
+		} else if(usedpercent >= 0.70 && usedpercent <= 0.90){
+			itemImageName = garage_availability_medium;
+		} else if (usedpercent > 0.90) {
+			itemImageName = garage_availability_low;
+		}
 	}
 	int numberOfAvailableSpaces = numberOfOperationalSpaces - occupied;
 	if(onStreet){
@@ -179,7 +213,12 @@
 	}
 	
 	if(occupied > numberOfOperationalSpaces){
-		itemImageName =  invalid_garage;
+		//v1.4 "On map garage icons, if the number of spaces occupied exceeds the number of spaces available (i.e., overcapacity), icon should appear red, not grey."
+		if(onStreet){
+			itemImageName =  street_availability_low;
+		}else{
+			itemImageName =  garage_availability_low;
+		}
 	}
     
 	if (showPrice){

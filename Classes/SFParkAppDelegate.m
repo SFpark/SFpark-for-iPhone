@@ -33,6 +33,8 @@
 @synthesize sharedString;
 
 - (void) applicationDidFinishLaunching:(UIApplication *)application {
+  NSSetUncaughtExceptionHandler(&uncaughtExceptionHandler);
+  [Flurry startSession:@"ADD_FLURRY_KEY"];
 	[window addSubview:viewController.view];
 	[window makeKeyAndVisible];
     [Appirater appLaunched];
@@ -98,6 +100,9 @@
 	 */
 }
 
+void uncaughtExceptionHandler(NSException *exception) {
+  [Flurry logError:@"Uncaught" message:@"Crash!" exception:exception];
+}
 
 - (void)dealloc {
 	[viewController release];
