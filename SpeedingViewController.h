@@ -22,20 +22,20 @@
  *
  */
 
-
-#import <UIKit/UIKit.h>
+@import UIKit;
 
 @protocol SpeedingViewControllerDelegate;
 
-@interface SpeedingViewController : UIViewController <UIWebViewDelegate> {
-	id <SpeedingViewControllerDelegate> delegate;
+@interface SpeedingViewController : UIViewController <UIWebViewDelegate>
+{
+	id <SpeedingViewControllerDelegate> __weak delegate;
 	UIButton *acceptWarning;
 	IBOutlet UIWebView *myWebView;
 }
-@property (nonatomic, retain) IBOutlet UIButton *acceptWarning;
+@property (nonatomic, strong) IBOutlet UIButton *acceptWarning;
 //@property (nonatomic, retain) IBOutlet UIButton *doneWithWarnings;
-@property (nonatomic, assign) id <SpeedingViewControllerDelegate> delegate;
-@property (nonatomic, retain) UIWebView *myWebView;
+@property (nonatomic, weak) id <SpeedingViewControllerDelegate> delegate;
+@property (nonatomic, strong) UIWebView *myWebView;
 
 -(IBAction)acceptWarningPressed;
 @end

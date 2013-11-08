@@ -29,7 +29,6 @@
 #import "MyAnnotation.h"
 #import <unistd.h>
 
-//#define DEBUG		//flag now in preprocessor macro debug configuration
 //#define WALKINGSPEED
 //#define FORCESPEEDCURTAIN
 
@@ -62,7 +61,8 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 #pragma mark Standard methods
 
 // Fire things off.
-- (void) viewDidLoad{
+- (void) viewDidLoad
+{
 	[super viewDidLoad];
 	[self showDisclaimer];
 #ifdef DEBUG
@@ -72,18 +72,19 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 #endif
 	self.interestAreas = [[NSMutableArray alloc] init];
 	self.blockfaces = [[NSMutableArray alloc] init];
-	[availabilityButton setSelected:YES];
+	[priceButton setSelected:YES];
 	
 	
 	stillLoading = YES;
 	stillDisplayingIntroView = YES;
-	showPrice = NO;
+	showPrice = YES;
 	seenDisclaimer = NO;
 	displayingDetails = NO;
 	lowMemoryMode = NO;
 	veryLowMemoryMode = NO;
 	//Live data source
-	serviceURL = @"http://api.sfpark.org/sfpark/rest/availabilityservice?radius=2.0&response=json&pricing=yes&version=1.4";
+	serviceURL = @"http://api.sfpark.org/sfpark/rest/availabilityservice?radius=5.0&response=json&pricing=yes&version=1.5";
+
 	
 	//v1.4 test harness url
 	//serviceURL = @"http://api.sfpark.org/sfparkTestData.json";
@@ -107,8 +108,29 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 	self.mapView.showsUserLocation = TRUE;
 	[self.mapView setRegion:region animated:TRUE];
 	[self.mapView regionThatFits:region];
+	self.mapView.showsBuildings = YES;
+	
+	if(!IS_IPHONE_5)
+	{
+		int yoffset = 90;
+		
+		CGRect modifiedFrame = CGRectMake(0, 66, 320, 455 - yoffset);
+		[self.mapView setFrame:modifiedFrame];
+
+		modifiedFrame = CGRectMake(10, 523 - yoffset, 60, 44);
+		[priceButton setFrame:modifiedFrame];
+		
+		modifiedFrame = CGRectMake(110, 523 - yoffset, 191, 44);
+		[availabilityButton setFrame:modifiedFrame];
+
+
+		modifiedFrame = CGRectMake(289, 534 - yoffset, 22, 22);
+		[infoButton setFrame:modifiedFrame];
+
+	}
+	
     
-    iconArray[0]  = [[UIImage imageNamed:@"invalid_garage"] retain];
+	iconArray[0]  = [[UIImage imageNamed:@"invalid_garage"] retain];
 	iconArray[1]  = [[UIImage imageNamed:@"street_invalid"] retain];
 	iconArray[2]  = [[UIImage imageNamed:@"garage_availability_high"] retain];
 	iconArray[3]  = [[UIImage imageNamed:@"street_availability_high"] retain];
@@ -126,38 +148,46 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 }
 
 // deallocate resources.
-- (void) dealloc{
+- (void) dealloc
+{
+//	[self.interestAreas release];
+//	[self.blockfaces release];
+//	[self.returnData release];
+//	[startTime release];
 	[super dealloc];
-	[self.interestAreas release];
-	[self.blockfaces release];
-	[self.returnData release];
-	[startTime release];
 }
 
 // Display the app either right-side up or upside down. No landscape.
-- (BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-	if (interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown || interfaceOrientation == UIInterfaceOrientationPortrait) {
+- (BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+	if (interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown || interfaceOrientation == UIInterfaceOrientationPortrait)
+	{
 		return YES;
-	} else {
+	} else
+	{
 		return NO;
 	}
 }
 
-- (BOOL) canBecomeFirstResponder {
+- (BOOL) canBecomeFirstResponder
+{
 	return YES;
 }
 
-- (void) viewDidAppear:(BOOL)animated {
+- (void) viewDidAppear:(BOOL)animated
+{
 	[self becomeFirstResponder];
 	[super viewDidAppear:animated];
 }
 
-- (void) viewDidDisappear:(BOOL)animated {
+- (void) viewDidDisappear:(BOOL)animated
+{
 	[self resignFirstResponder];
 	[super viewDidDisappear:animated];
 }
 
-- (void) didReceiveMemoryWarning {
+- (void) didReceiveMemoryWarning
+{
 	[super didReceiveMemoryWarning];
 	return;
 }
@@ -165,10 +195,40 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 #pragma mark -
 #pragma mark Interface Outlets
 
+//- (IBAction)changeDataSource:(id)sender
+//{
+//
+//	UISegmentedControl * segment;
+//	segment = (UISegmentedControl * ) sender;
+//	switch (segment.selectedSegmentIndex)
+//	{
+//		case VERSIONA:
+//			serviceURL = @"http://75.10.224.12:9001/testa/sfpark/rest/availabilityservice?radius=5.0&response=json&pricing=yes&version=1.5";
+//			buildName.text = @"Salt 'n Peppa";
+//			break;
+//		case VERSIONB:
+//			serviceURL = @"http://75.10.224.12:9001/testb/sfpark/rest/availabilityservice?radius=5.0&response=json&pricing=yes&version=1.5";
+//			buildName.text = @"Flipmode";
+//			break;
+//		case ORIGINAL:
+//			serviceURL = @"http://api.sfpark.org/sfpark/rest/availabilityservice?radius=5.0&response=json&pricing=yes&version=1.5";
+//			buildName.text = @"v1.5";
+//			break;
+//		default:
+//			break;
+//		}
+//	NSLog(@"Data URL: %@",serviceURL);
+//	
+//	[self performSelector:@selector(loadData) withObject:nil afterDelay:0];
+//
+//}
+
 // Switch on Availability mode
-- (IBAction) showAvailability: (id)sender{
+- (IBAction) showAvailability: (id)sender
+{
 	// If we're not already in availability mode, change to it.
-	if (showPrice == YES){
+	if (showPrice == YES)
+	{
 		showPrice = NO;
 		[self hideAllActivityIndicators];
 		HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -182,17 +242,15 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 	legendlabel.accessibilityLabel = @"Availability display";
 	UIImage *legendImage = [UIImage imageNamed:@"key_availability"];
 	[legend setImage:legendImage ];
-	UIImage *buttonImage = [UIImage imageNamed:@"button_availability_active"];
-	[availabilityButton setImage:buttonImage forState:(UIControlStateHighlighted|UIControlStateSelected)];
-	UIImage *priceImage = [UIImage imageNamed:@"button_pricing_up"];
-	[self.priceButton setImage:priceImage forState:UIControlStateSelected|UIControlStateNormal|UIControlStateHighlighted];
   [Flurry logEvent:@"Availability_Mode_Shown"];
 }
 
 // Switch on Pricing mode
-- (IBAction) showPricing: (id)sender{
+- (IBAction) showPricing: (id)sender
+{
 	// If we're not already in price mode, reload it in price display configuration
-	if (showPrice == NO){
+	if (showPrice == NO)
+	{
 		showPrice = YES;
 		[self hideAllActivityIndicators];
 		HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -205,15 +263,12 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 	legendlabel.accessibilityLabel = @"Price display";
 	UIImage *legendImage = [UIImage imageNamed:@"key_pricing"];
 	[legend setImage:legendImage ];
-	UIImage *priceImage = [UIImage imageNamed:@"button_pricing_active"];
-	[self.priceButton setImage:priceImage forState:UIControlStateSelected|UIControlStateNormal|UIControlStateHighlighted];
-	UIImage *buttonImage = [UIImage imageNamed:@"button_availability_up"];
-	[availabilityButton setImage:buttonImage forState:(UIControlStateHighlighted|UIControlStateSelected)];
   [Flurry logEvent:@"Pricing_Mode_Shown"];
 }
 
 // Refresh the data from the server.
-- (IBAction) refresh: (id)sender{
+- (IBAction) refresh: (id)sender
+{
   [Flurry logEvent:@"Refresh_Button_Pressed"];
 	double gpsSpeed = 0.0;
 	ageOfData.text =  [NSString stringWithFormat:@"%5.2fMPH",gpsSpeed];
@@ -225,8 +280,10 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 }
 
 // Reload the data on a shake event.
-- (void) motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event{
-	if (event.subtype == UIEventSubtypeMotionShake){
+- (void) motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event
+{
+	if (event.subtype == UIEventSubtypeMotionShake)
+	{
     [Flurry logEvent:@"Shaken_To_Refresh"];
 		[self hideAllActivityIndicators];
 		HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -241,9 +298,12 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 #pragma mark Data loading methods
 
 // Load all the data from the API server.
-- (void) loadData{
-	startTime = [NSDate date];
-	[startTime retain];
+- (void) loadData
+{
+	startDataTime = mach_absolute_time( );
+
+//	startTime = [NSDate date];
+//	[startTime retain];
 	[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 	//responseData = [[NSMutableData data] retain];
 	NSString * whichService;
@@ -266,7 +326,13 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 }
 
 //ASIHTTPRequest delegate method
-- (void) requestFinished:(ASIHTTPRequest *)request{
+- (void) requestFinished:(ASIHTTPRequest *)request
+{
+	uint64_t endDataTime = mach_absolute_time( );
+	uint64_t elapsedTime = endDataTime - startDataTime;
+//	TFLog(@"%f < elapsed data loading time",elapsedTime/1000000000.0);
+
+//	[TestFlight passCheckpoint:@"Data_Received"];
 	[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 	/*
 	NSString *contentLengthString = [[request responseHeaders] objectForKey:@"Content-Length"];
@@ -277,7 +343,7 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 								[[request responseHeaders] objectForKey:@"Content-Length"],
 								(contentlength / (-howLong))];
 	*/
-//	uint64_t startTime = mach_absolute_time( );
+	uint64_t startParseTime = mach_absolute_time( );
 	NSError *error;
     // TODO: Profile other json parsers and see if there's an appreciable speedup.
 	SBJSON *json = [SBJSON new];
@@ -290,10 +356,9 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 //												error:&error];
 
 	//self.returnData = [json objectWithString:[request responseString] error:&error];
-	
-//	uint64_t endTime = mach_absolute_time( );
-//	uint64_t elapsedTime = endTime - startTime;
-//	NSLog(@"%llu < elapsed parsing time",elapsedTime);
+	uint64_t endTime = mach_absolute_time( );
+	elapsedTime = endTime - startParseTime;
+//	TFLog(@"%f < elapsed parsing time",elapsedTime/1000000000.0);
 	
 	self.returnData = dObj;
 	[json release];
@@ -303,16 +368,20 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 }
 
 //ASIHTTPRequest delegate method
-- (void) requestFailed:(ASIHTTPRequest *)request{
+- (void) requestFailed:(ASIHTTPRequest *)request
+{
 	//NSError *error = [request error];
 	label.text = @"There was an error loading the parking data.";
 	[self hideAllActivityIndicators];
 	UIAlertView* alertView = nil; 
-	@try { 
+	@try
+	{
         alertView = [[UIAlertView alloc] initWithTitle:@"Unable to fetch data from server" message:@"Please try again." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil]; 
         [alertView show]; 
-	} @finally { 
-        if (alertView) { 
+	} @finally
+	{
+        if (alertView)
+				{
             [alertView release]; 
         } 
 	}
@@ -321,28 +390,34 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 #pragma mark -
 #pragma mark Data display methods
 
-- (void) displayData{
+- (void) displayData
+{
 	stillLoading = YES;
 	[self hideAllActivityIndicators];
-	if (self.returnData == nil){
+	if (self.returnData == nil)
+	{
 		label.text = @"Data parsing failed";
 		[self hideAllActivityIndicators];
 		
 		UIAlertView* alertView = nil; 
-		@try { 
+		@try
+		{
 			alertView = [[UIAlertView alloc] initWithTitle:@"Unable to read parking data" message:@"Please try again." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil]; 
 			
 			[alertView show]; 
-		} @finally { 
-			if (alertView) { 
+		} @finally
+		{
+			if (alertView)
+			{
 				[alertView release]; 
 			} 
 		}
 		
-	} else {
-		NSArray * data = [self.returnData objectForKey:@"AVL"];
+	} else
+	{
+		NSArray * data = (self.returnData)[@"AVL"];
 		//NSString * updatedTime = [self.returnData objectForKey:@"AVAILABILITY_UPDATED_TIMESTAMP"];
-		NSString * recievedTime = [self.returnData objectForKey:@"AVAILABILITY_REQUEST_TIMESTAMP"];
+		NSString * recievedTime = (self.returnData)[@"AVAILABILITY_REQUEST_TIMESTAMP"];
 		//NSLog(@"recTime %@",recievedTime);
 		// 4/7/11: API server timezone info changed from -08:00 to -07:00. Asking for the addition of "GMT" + offset to insulate from any string changes required here.
 		NSString *cleanedTimeZone = [recievedTime stringByReplacingOccurrencesOfString:@"-07:00" withString:@"GMT-07:00"]; // Need to add 'GMT' to the time string to be able to use the NSDateFormatter with the ZZZZ directive.
@@ -359,9 +434,11 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 		[dateFormatter release];
 		[df release];
 		
-		if (showPrice) {
+		if (showPrice)
+		{
 			legendlabel.text = [NSString stringWithFormat:@"Price as of %@",strDate];
-		} else {
+		} else
+		{
 			legendlabel.text = [NSString stringWithFormat:@"Availability as of %@",strDate];
 		}
 		
@@ -372,39 +449,58 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-		for(id element in data){
-			if([element objectForKey:@"LOC"]){
-				NSString * loc = [element objectForKey:@"LOC"];
+		for(id element in data)
+		{
+			if(element[@"LOC"])
+			{
+				NSString * loc = element[@"LOC"];
 				NSArray *blockPoints = [loc componentsSeparatedByString: @","];
-				int numberOfPoints = [[element objectForKey:@"PTS"] intValue];
+				int numberOfPoints = [element[@"PTS"] intValue];
 				CLLocationCoordinate2D  location;
-				if (numberOfPoints  == 2) {
-					location.latitude = (([[blockPoints objectAtIndex:1] doubleValue] + [[blockPoints objectAtIndex:3] doubleValue]) / 2.0);
-					location.longitude= (([[blockPoints objectAtIndex:0] doubleValue] + [[blockPoints objectAtIndex:2] doubleValue]) / 2.0);
-				} else {
-					location.latitude = [[blockPoints objectAtIndex:1] floatValue];
-					location.longitude= [[blockPoints objectAtIndex:0] floatValue];
+				if (numberOfPoints  == 2)
+				{
+					location.latitude = (([blockPoints[1] doubleValue] + [blockPoints[3] doubleValue]) / 2.0);
+					location.longitude= (([blockPoints[0] doubleValue] + [blockPoints[2] doubleValue]) / 2.0);
+				} else
+				{
+					location.latitude = [blockPoints[1] floatValue];
+					location.longitude= [blockPoints[0] floatValue];
 				}
 
-				MyAnnotation* interestArea = [[MyAnnotation alloc] initWithData:element andLocation:location];
-				interestArea.timeStamp = cleanRecievedTime;
-				if (numberOfPoints == 2) { // Two points, it's a block of on-street parking
+				// v1.5 change. No longer display any blockfaces in availability mode.
+				if( !showPrice && numberOfPoints == 2)
+				{
+					continue;
+				}
+				//v1.5 The following code is a special bypass for the California and Steiner Lot which should no longer be displayed in Availability mode. (Offstreet ID is 902 for that lot.)
+				if( !showPrice && [element[@"OSPID"] isEqualToString:@"902"])
+				{
+					continue;
+				}
+
+					
+					MyAnnotation* interestArea = [[MyAnnotation alloc] initWithData:element andLocation:location];
+					interestArea.timeStamp = cleanRecievedTime;
+					if (numberOfPoints == 2)
+					{
+						// Two points, it's a block of on-street parking
 						CLLocationCoordinate2D  points[2];
-						points[0] = CLLocationCoordinate2DMake([[blockPoints objectAtIndex:1] floatValue],[[blockPoints objectAtIndex:0] floatValue]);
-						points[1] = CLLocationCoordinate2DMake([[blockPoints objectAtIndex:3] floatValue],[[blockPoints objectAtIndex:2] floatValue]);					
-                        MyPolyline* poly = (MyPolyline*)[MyPolyline polylineWithCoordinates:points count:numberOfPoints];
-                        poly.lineColor = [interestArea blockfaceColorizerWithShowPrice:showPrice];
+						points[0] = CLLocationCoordinate2DMake([blockPoints[1] floatValue],[blockPoints[0] floatValue]);
+						points[1] = CLLocationCoordinate2DMake([blockPoints[3] floatValue],[blockPoints[2] floatValue]);					
+												MyPolyline* poly = (MyPolyline*)[MyPolyline polylineWithCoordinates:points count:numberOfPoints];
+												poly.lineColor = [interestArea blockfaceColorizerWithShowPrice:showPrice];
 						[self.blockfaces addObject:poly];
 						[self.mapView addOverlay:poly];
-				}
-				// TODO: Implement something akin to this for a future where there are many points...
-				//[mapView isCoordinateInVisibleRegion:myCoordinate]
-				
-                [self.mapView addAnnotation:interestArea];
-                if ([self inClose]) {
-                    displayingDetails = YES;
-                }
-				[interestArea release];
+					}
+					// TODO: Implement something akin to this for a future where there are many points...
+					//[mapView isCoordinateInVisibleRegion:myCoordinate]
+					
+									[self.mapView addAnnotation:interestArea];
+									if ([self inClose])
+									{
+											displayingDetails = YES;
+									}
+					[interestArea release];
 			}
 		}						   
 		[pool release];
@@ -412,16 +508,18 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 	stillLoading = NO;
 }
 
-- (void)mapView:(MKMapView *)mapView didAddAnnotationViews:(NSArray *)views{
-	if (stillLoading){
+- (void)mapView:(MKMapView *)mapView didAddAnnotationViews:(NSArray *)views
+{
+	if (stillLoading)
+	{
 		return;
-    }
+	}
 	[self hideAllActivityIndicators];
-
 }
 
 
-- (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated{
+- (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
+{
 	if (stillDisplayingIntroView)
 		return;
 //	 NOTE: (For newer devices, avoiding this forced re-draw speeds up the experience dramatically.)
@@ -434,23 +532,29 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 
 
 // Determine, arbitrarily, how closely we are zoomed in. If past a certain theshold (15?), return "close"
-- (BOOL) inClose{
+- (BOOL) inClose
+{
 	NSUInteger zoomLevel = [self zoomLevelForMapRect:self.mapView.visibleMapRect withMapViewSizeInPixels: self.mapView.bounds.size];
 	//NSLog(@"zoom level = %d",zoomLevel);
-	if (lowMemoryMode){
-		if( zoomLevel > 18) {
+	if (lowMemoryMode)
+	{
+		if( zoomLevel > 18)
+		{
 			return YES;
 		}
-	} else	if (zoomLevel > 13 || ([self isOldHardware:[self platform]] && zoomLevel > 16)) {
+	} else	if (zoomLevel > 13 || ([self isOldHardware:[self platform]] && zoomLevel > 16))
+	{
 		return YES;
-	} else {
+	} else
+	{
 		return NO;
 	}
 	return NO;
 }
 
 // Figure out how closely in we are zoomed.
-- (NSUInteger) zoomLevelForMapRect:(MKMapRect)mRect withMapViewSizeInPixels:(CGSize)viewSizeInPixels{
+- (NSUInteger) zoomLevelForMapRect:(MKMapRect)mRect withMapViewSizeInPixels:(CGSize)viewSizeInPixels
+{
 	NSUInteger zoomLevel = MAXIMUM_ZOOM; // MAXIMUM_ZOOM is 20 with MapKit
 	MKZoomScale zoomScale = mRect.size.width / viewSizeInPixels.width; //MKZoomScale is just a CGFloat typedef
 	double zoomExponent = log2(zoomScale);
@@ -459,7 +563,8 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 }
 
 // GarageDetailsViewController display done. 
-- (void) garageDetailsViewControllerDidFinish:(GarageDetailsViewController *)controller {	
+- (void) garageDetailsViewControllerDidFinish:(GarageDetailsViewController *)controller
+{
 	UIView *subView = [self.view viewWithTag:23];
 	[subView removeFromSuperview];
 }
@@ -468,25 +573,29 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 #pragma mark Speed curtain methods
 
 // Load speed warning view.
-- (void) speedWarning{
+- (void) speedWarning
+{
 #ifdef FORCESPEEDCURTAIN
 	[[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"speedWarningAcknowledged"]; // Force disclaimer screen for testing
 #endif
 	seenDisclaimer = [[NSUserDefaults standardUserDefaults] boolForKey:@"speedWarningAcknowledged"];
-	if(! seenDisclaimer){
+	if(! seenDisclaimer)
+	{
 		label.text = @"speedwarning";
 		[locationManager stopUpdatingLocation];
 		SpeedingViewController *controller = [[SpeedingViewController alloc] initWithNibName:@"SpeedingView" bundle:nil];
 		controller.delegate = self;
 		controller.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
-		[self presentModalViewController:controller animated:YES];
+		[self presentViewController:controller animated:YES completion:nil];
 		[controller release];
 	}
 }
 
 // Start updating location again, as the speed warning view is gone.
-- (void) speedViewControllerDidFinish:(SpeedingViewController *)controller {
-	[self dismissModalViewControllerAnimated:YES];
+- (void) speedViewControllerDidFinish:(SpeedingViewController *)controller
+{
+	[self dismissViewControllerAnimated:YES completion:nil];
+
 	[locationManager startUpdatingLocation];
 	label.text = @"speedwarning finished.";
 	[[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"speedWarningAcknowledged"];
@@ -494,26 +603,32 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 }
 
 // Check if the speed returned is above the warning threshold.
-- (BOOL) isMovingTooFastNewLocation:(CLLocation *) newLocation OldLocation: (CLLocation *) oldLocation{
+- (BOOL) isMovingTooFastNewLocation:(CLLocation *) newLocation OldLocation: (CLLocation *) oldLocation
+{
 	//return YES; // for debug
 	//FEATURE: Perhaps improve this to check if the moving average speed is above the threshold rather than instantantaneous speed.
-	if (newLocation.speed > SPEED_THRESHOLD) {
+	if (newLocation.speed > SPEED_THRESHOLD)
+	{
 		return YES;
-	}else {
+	}else
+	{
 		return NO;
 	}
 }
 
 // Check if the speed returned is above the warning threshold.
-- (void) locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation{
+- (void) locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
+{
 	double gpsSpeed = newLocation.speed;
-	if (gpsSpeed >= 0.0) {
+	if (gpsSpeed >= 0.0)
+	{
 		gpsSpeed *= MPSTOMPH; // Convert meters per second to miles per hour.
 		ageOfData.textColor = [UIColor whiteColor];
 		ageOfData.numberOfLines = 1;
 		ageOfData.adjustsFontSizeToFitWidth = YES;
 		ageOfData.text = [NSString stringWithFormat:@"%5.2fMPH",gpsSpeed];
-		if([self isMovingTooFastNewLocation:newLocation OldLocation:oldLocation]){
+		if([self isMovingTooFastNewLocation:newLocation OldLocation:oldLocation])
+		{
 			label.text = @"Moving too fast.\nSpeed warning!";
 			[self speedWarning];
 		}
@@ -524,19 +639,21 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 #pragma mark Credits display
 
 //Credits display
-- (IBAction) showInfo:(id)sender {
+- (IBAction) showInfo:(id)sender
+{
 	label.numberOfLines = 1;
 	label.text = @"Loading info screen.";
 	FlipsideViewController *controller = [[FlipsideViewController alloc] initWithNibName:@"Credits" bundle:nil];
 	controller.delegate = self;
 	controller.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
-	[self presentModalViewController:controller animated:YES];
+	[self presentViewController:controller animated:YES completion:nil];
 	[controller release];
 }
 
 // Credits display done. 
-- (void) flipsideViewControllerDidFinish:(FlipsideViewController *)controller {	
-	[self dismissModalViewControllerAnimated:YES];
+- (void) flipsideViewControllerDidFinish:(FlipsideViewController *)controller
+{
+	[self dismissViewControllerAnimated:YES completion:nil];
 	label.text = @"Back from the credits screen.";
 }
 
@@ -544,7 +661,8 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 #pragma mark IntroViewController methods
 
 // Show the introduction / disclaimer screen. 
-- (void) showDisclaimer{
+- (void) showDisclaimer
+{
 	IntroViewController *introViewController = [[IntroViewController alloc] initWithNibName:@"IntroView" bundle:[NSBundle mainBundle]];
 	introViewController.delegate = self;
 	[self.view addSubview:introViewController.view];
@@ -556,7 +674,8 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 {	
 	UIView *subView = [self.view viewWithTag:23];
 	[subView removeFromSuperview];
-	if (stillDisplayingIntroView) {
+	if (stillDisplayingIntroView)
+	{
 		stillDisplayingIntroView = NO;
 	}
 	if (stillLoading)
@@ -583,13 +702,15 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
     if (!MKMapRectIntersectsRect([overlay boundingMapRect], mapView.visibleMapRect))
 		return nil; //MSM test
     
-	if ([overlay isKindOfClass:[MKPolygon class]]){
+	if ([overlay isKindOfClass:[MKPolygon class]])
+	{
 		MKPolygonView*    aView = [[[MKPolygonView alloc] initWithPolygon:(MKPolygon*)overlay] autorelease];
 		aView.fillColor = self.lineColor;
 		aView.strokeColor = self.lineColor;
 		aView.lineWidth = 8;
 		return aView;
-	}else{
+	}else
+	{
         MyPolyline *thisLine = (MyPolyline*)overlay;
 		MKPolylineView *polyLineView = [[[MKPolylineView alloc] initWithOverlay:overlay] autorelease];
 		polyLineView.strokeColor = thisLine.lineColor;
@@ -598,15 +719,18 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 	}
 }
 
-- (MKAnnotationView *) mapView:(MKMapView *)mapView viewForAnnotation:(id <MKAnnotation>)annotation{
-	if ([annotation isKindOfClass:[MKUserLocation class]]){
+- (MKAnnotationView *) mapView:(MKMapView *)mapView viewForAnnotation:(id <MKAnnotation>)annotation
+{
+	if ([annotation isKindOfClass:[MKUserLocation class]])
+	{
 		return nil;
 	}
 	// Try to dequeue an annotation first...
 	MKAnnotationView *pointOfInterestIcon = nil;
 	static NSString *defaultID = @"annotationID";
 	pointOfInterestIcon = (MKAnnotationView *)[mapView dequeueReusableAnnotationViewWithIdentifier:defaultID];
-	if ( pointOfInterestIcon == nil ){
+	if ( pointOfInterestIcon == nil )
+	{
 		pointOfInterestIcon = [[[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:defaultID] autorelease];
     UIButton *rightButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
     [rightButton addTarget:self action:@selector(showDetails:) forControlEvents:UIControlEventTouchUpInside];
@@ -618,7 +742,8 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 	MyAnnotation * currentAnnotation = (MyAnnotation *)annotation;
 	currentAnnotation.subtitle = 	[currentAnnotation availabilityDescriptionShowingPrice:showPrice];
 	itemImageName = [currentAnnotation iconFinder:showPrice];
-	if ((itemImageName >= 0) && (itemImageName <= 13)){ // Upper and lower bounds for the index mapping into the different icons.
+	if ((itemImageName >= 0) && (itemImageName <= 13))
+	{ // Upper and lower bounds for the index mapping into the different icons.
 		[pointOfInterestIcon setImage:iconArray[itemImageName]];
 	}
     pointOfInterestIcon.rightCalloutAccessoryView.tag = (int)annotation;
@@ -628,14 +753,15 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 }
 
 // Load up another view with the details of the currently selected garage or street.
-- (IBAction) showDetails:(UIView *)sender{
+- (IBAction) showDetails:(UIView *)sender
+{
 	MyAnnotation* currentSelection = (MyAnnotation*)sender.tag;
 
   NSString * detailsString;
   detailsString = [NSString stringWithFormat:@"Show_Details_%@",currentSelection.title];
   NSLog(@"showDetails sender:%@",detailsString);
   NSDictionary *locationDetails =
-  [NSDictionary dictionaryWithObjectsAndKeys:currentSelection.title, @"Details for",nil];
+  @{@"Details for": currentSelection.title};
 
   [Flurry logEvent: @"Show_Details" withParameters:locationDetails];
 	GarageDetailsViewController *garageDetailsViewController = [[GarageDetailsViewController alloc] initWithNibName:@"GarageDetailsView" bundle:[NSBundle mainBundle]];
@@ -643,7 +769,7 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 	garageDetailsViewController.thisGarage = currentSelection;
 	
 	garageDetailsViewController.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;		//default is UIModalTransitionStyleCoverVertical
-	[self presentModalViewController:garageDetailsViewController animated:YES];  
+	[self presentViewController:garageDetailsViewController animated:YES completion:nil];
 }
 
 #pragma mark -
@@ -664,23 +790,27 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 #pragma mark -
 #pragma mark MBProgressHUDDelegate methods
 
-- (void) hudWasHidden {
+- (void) hudWasHidden
+{
 	[HUD removeFromSuperview];
 	[HUD release];
 }
 
-- (void) HUDrefreshing {
+- (void) HUDrefreshing
+{
  HUD.mode = MBProgressHUDModeDeterminate;
  HUD.detailsLabelText = @"Loading";
  float progress = 0.0f;
- while (progress < 1.0f){
+ while (progress < 1.0f)
+ {
 	 progress += 0.01f;
 	 HUD.progress = progress;
 	 //usleep(500);
  }
 }
 
-- (void) hideAllActivityIndicators {
+- (void) hideAllActivityIndicators
+{
 	[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 	stillLoading = NO;
 	[MBProgressHUD hideHUDForView:self.view animated:YES];
@@ -691,12 +821,13 @@ static CLLocationDegrees INITIAL_LONGITUDE = -122.42; // SF initial view
 #pragma mark Device detection
 
 // Determine the device the app is running on.
-- (NSString *) platform{
+- (NSString *) platform
+{
 	size_t size;
 	sysctlbyname("hw.machine", NULL, &size, NULL, 0);
 	char *machine = malloc(size);
 	sysctlbyname("hw.machine", machine, &size, NULL, 0);
-	NSString *platform = [NSString stringWithCString:machine encoding:NSUTF8StringEncoding];
+	NSString *platform = @(machine);
 	free(machine);
 	if ([platform isEqualToString:@"iPhone1,1"])    return @"iPhone 1G";
 	if ([platform isEqualToString:@"iPhone1,2"])    return @"iPhone 3G";

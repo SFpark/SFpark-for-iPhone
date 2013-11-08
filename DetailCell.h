@@ -22,10 +22,10 @@
  *
  */
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 
-
-@interface DetailCell : UITableViewCell{
+@interface DetailCell : UITableViewCell
+{
 	// adding the 4 labels we want to show in the cell
 	UILabel *cellLabel1;
 	UILabel *cellLabel2;
@@ -34,9 +34,9 @@
 	
 }
 
-@property (nonatomic, retain) UILabel *cellLabel1;
-@property (nonatomic, retain) UILabel *cellLabel2;
-@property (nonatomic, retain) UILabel *cellLabel3;
-@property (nonatomic, retain) UILabel *cellLabel4;
+@property (nonatomic, strong) UILabel *cellLabel1;
+@property (nonatomic, strong) UILabel *cellLabel2;
+@property (nonatomic, strong) UILabel *cellLabel3;
+@property (nonatomic, strong) UILabel *cellLabel4;
 
 @end

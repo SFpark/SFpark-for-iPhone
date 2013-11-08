@@ -29,17 +29,14 @@
 
 @synthesize lineColor;
 
-- (id)init{
-    self = [super init];
-    if (self) {
-        lineColor = [UIColor blackColor];
-    }
-    
-    return self;
+- (id)init
+{
+	self = [super init];
+	if (self)
+	{
+		lineColor = [UIColor blackColor];
+	}
+	
+	return self;
 }
-
-- (void)dealloc{
-    [super dealloc];
-}
-
 @end

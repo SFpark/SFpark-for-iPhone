@@ -30,14 +30,16 @@
 @synthesize cellLabel1,cellLabel2,cellLabel3,cellLabel4;
 
 
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
-
-    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
-    if (self){
-        // Initialization code.
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+	self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+	if (self)
+	{
+		// Initialization code.
 		
 		
 		CGRect defaultFrame = CGRectZero;
+		UIColor * cellBackgroundColor = [UIColor clearColor];
 		
 		//alloc the labels here, once only, then configure them later on.
 		
@@ -46,15 +48,13 @@
 		cellLabel3 = [[UILabel alloc] initWithFrame:defaultFrame];
 		cellLabel4 = [[UILabel alloc] initWithFrame:defaultFrame];
 		
-		cellLabel1.backgroundColor = [UIColor colorWithRed:0.8 green:0.8 blue:0.8 alpha:1];
-		cellLabel2.backgroundColor = [UIColor colorWithRed:0.8 green:0.8 blue:0.8 alpha:1];
-		cellLabel3.backgroundColor = [UIColor colorWithRed:0.8 green:0.8 blue:0.8 alpha:1];
-		cellLabel4.backgroundColor = [UIColor colorWithRed:0.8 green:0.8 blue:0.8 alpha:1];
+		cellLabel1.backgroundColor = cellBackgroundColor;
+		cellLabel2.backgroundColor = cellBackgroundColor;
+		cellLabel3.backgroundColor = cellBackgroundColor;
+		cellLabel4.backgroundColor = cellBackgroundColor;
 		
-		
-		//apparently cell.textLabel.font  = [UIFont fontWithName:@"Helvetica-Bold" size:16.0]; 
+		//apparently cell.textLabel.font  = [UIFont fontWithName:@"Helvetica-Bold" size:16.0];
 		//     		 cell.detailTextLabel.font = [UIFont fontWithName:@"Helvetica" size:14.0];
-		
 		
 		cellLabel1.font = [UIFont fontWithName:@"Helvetica" size:16.0];
 		cellLabel2.font = [UIFont fontWithName:@"Helvetica" size:16.0];
@@ -63,27 +63,19 @@
 
 		//could hide them if necessary
 		
-		[self.contentView addSubview:cellLabel1]; 
-		[self.contentView addSubview:cellLabel2]; 
-		[self.contentView addSubview:cellLabel3]; 
-		[self.contentView addSubview:cellLabel4]; 
-		
-    }
-    return self;
+		[self.contentView addSubview:cellLabel1];
+		[self.contentView addSubview:cellLabel2];
+		[self.contentView addSubview:cellLabel3];
+		[self.contentView addSubview:cellLabel4];
+	}
+	return self;
 }
 
-
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated{
-    
-    [super setSelected:selected animated:animated];
-    
-    // Configure the view for the selected state.
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated
+{
+	[super setSelected:selected animated:animated];
+  
+	// Configure the view for the selected state.
 }
-
-
-- (void)dealloc{
-    [super dealloc];
-}
-
 
 @end

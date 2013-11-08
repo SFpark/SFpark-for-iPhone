@@ -30,14 +30,28 @@
 @synthesize acceptWarning;
 @synthesize myWebView;
 
-- (void) viewDidLoad {
+- (void) viewDidLoad
+{
 	[super viewDidLoad];
 
 	CGRect webFrame = [[UIScreen mainScreen] applicationFrame];
-	webFrame.origin.y = 88.0;
-	webFrame.size.height = 300.0;
-	webFrame.size.width =  320.0;	
-	self.myWebView = [[[UIWebView alloc] initWithFrame:webFrame] autorelease];
+	webFrame.origin.y = 108.0;
+	webFrame.size.height = 340.0;
+	webFrame.size.width =  320.0;
+	if (IS_IPHONE_5)
+	{
+		int iphone5heightaddition = 40;
+		webFrame.size.height += iphone5heightaddition;
+	}
+	
+	if(!IS_IPHONE_5)
+	{
+		CGRect acceptFrame = CGRectMake(10, 420, 240, 37);
+		[acceptWarning setFrame:acceptFrame];
+	}
+
+
+	self.myWebView = [[UIWebView alloc] initWithFrame:webFrame];
 	self.myWebView.backgroundColor = [UIColor whiteColor];
 	self.myWebView.scalesPageToFit = NO;
 	self.myWebView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
@@ -51,12 +65,13 @@
 	[myWebView loadData:htmlData MIMEType:@"text/html" textEncodingName:@"UTF-8" 	baseURL:[NSURL URLWithString: [NSString stringWithFormat:@"file:/%@//",imagePath]]];
 }
 
--(IBAction) acceptWarningPressed{
+-(IBAction) acceptWarningPressed
+{
 	[self.delegate speedViewControllerDidFinish:self];	
 }
 
-- (void) dealloc {
-	[super dealloc];
+- (void) dealloc
+{
 	myWebView.delegate = nil;
 }
 

@@ -22,14 +22,15 @@
  *
  */
 
-#import <UIKit/UIKit.h>
-#import <MapKit/MapKit.h>
-#import <AudioToolbox/AudioToolbox.h>
+@import UIKit;
+@import MapKit;
+@import AudioToolbox;
+
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <mach/mach_time.h>
 
-
+//#import "TestFlight.h"
 #import "Flurry.h"
 #import "MBProgressHUD.h"
 #import "SpeedingViewController.h"
@@ -37,9 +38,15 @@
 #import "IntroViewController.h"
 #import "GarageDetailsViewController.h"
 
+// For v1.5 debugging to toggle different data sources
+#define VERSIONA 0
+#define VERSIONB 1
+#define ORIGINAL 2
+
 #define MPSTOMPH  3600 / 1610.3 * 1000 / 1000; // Convert meters per second to miles per hour. 
 
-@interface SFParkViewController : UIViewController <MBProgressHUDDelegate, MKMapViewDelegate, FlipsideViewControllerDelegate,CLLocationManagerDelegate, SpeedingViewControllerDelegate, IntroViewControllerDelegate, GarageDetailsViewControllerDelegate>{
+@interface SFParkViewController : UIViewController <MBProgressHUDDelegate, MKMapViewDelegate, FlipsideViewControllerDelegate,CLLocationManagerDelegate, SpeedingViewControllerDelegate, IntroViewControllerDelegate, GarageDetailsViewControllerDelegate>
+{
 
 	IBOutlet UILabel *label;
 	IBOutlet UILabel *ageOfData;
@@ -48,7 +55,10 @@
 	IBOutlet UILabel *buildNumber;
 	IBOutlet UIButton *priceButton;
 	IBOutlet UIButton *availabilityButton;
-
+	__weak IBOutlet UIButton *infoButton;
+//	__weak IBOutlet UISegmentedControl *dataSourceToggle;
+//	__weak IBOutlet UILabel *buildName;
+	
 	MBProgressHUD *HUD;
 	NSMutableData *responseData;
 	MKMapView *_mapView;
@@ -71,7 +81,7 @@
 	BOOL veryLowMemoryMode;
 	
 	UIImage *iconArray[14];
-
+	uint64_t startDataTime;
 }
 @property (nonatomic, retain) IBOutlet MKMapView* mapView;
 @property (nonatomic, retain) CLLocationManager *locationManager;

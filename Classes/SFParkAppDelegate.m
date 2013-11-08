@@ -24,6 +24,7 @@
 
 #import "SFParkAppDelegate.h"
 #import "SFParkViewController.h"
+//#import "TestFlight.h"
 
 
 @implementation SFParkAppDelegate
@@ -32,15 +33,21 @@
 @synthesize viewController;
 @synthesize sharedString;
 
-- (void) applicationDidFinishLaunching:(UIApplication *)application {
+- (void) applicationDidFinishLaunching:(UIApplication *)application
+{
+//  [TestFlight takeOff:@"KEY_HERE"];
   NSSetUncaughtExceptionHandler(&uncaughtExceptionHandler);
-  [Flurry startSession:@"ADD_FLURRY_KEY"];
-	[window addSubview:viewController.view];
+	
+  [Flurry startSession:@"KEY_HERE"];
+	
+	[self.window setRootViewController:viewController];
+
 	[window makeKeyAndVisible];
-    [Appirater appLaunched];
+	[Appirater appLaunched];
 	/*
 	CLLocationManager *manager = [[CLLocationManager alloc] init];
-	if ([CLLocationManager locationServicesEnabled] == NO) {
+	if ([CLLocationManager locationServicesEnabled] == NO) 
+	 {
 		UIAlertView *servicesDisabledAlert = [[UIAlertView alloc] initWithTitle:@"Location Services Disabled" message:@"You currently have all location services for this device disabled. If you proceed, you will be asked to confirm whether location services should be reenabled." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
 		[servicesDisabledAlert show];
 		[servicesDisabledAlert release];
@@ -49,7 +56,8 @@
 	*/
 }
 
-- (void) applicationWillResignActive:(UIApplication *)application {
+- (void) applicationWillResignActive:(UIApplication *)application
+{
 	/*
 	 Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
 	 Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
@@ -57,7 +65,8 @@
 }
 
 
-- (void) applicationDidEnterBackground:(UIApplication *)application {
+- (void) applicationDidEnterBackground:(UIApplication *)application
+{
 	/*
 	 Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
 	 If your application supports background execution, called instead of applicationWillTerminate: when the user quits.
@@ -65,7 +74,8 @@
 }
 
 
-- (void) applicationWillEnterForeground:(UIApplication *)application {
+- (void) applicationWillEnterForeground:(UIApplication *)application
+{
     [Appirater appEnteredForeground:YES];
 	/*
 	 Called as part of  transition from the background to the inactive state: here you can undo many of the changes made on entering the background.
@@ -73,14 +83,16 @@
 }
 
 
-- (void) applicationDidBecomeActive:(UIApplication *)application {
+- (void) applicationDidBecomeActive:(UIApplication *)application
+{
 	/*
 	 Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 	 */
 }
 
 
-- (void) applicationWillTerminate:(UIApplication *)application {
+- (void) applicationWillTerminate:(UIApplication *)application
+{
 	/*
 	 Called when the application is about to terminate.
 	 See also applicationDidEnterBackground:.
@@ -94,20 +106,17 @@
 #pragma mark -
 #pragma mark Memory management
 
-- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
+- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application
+{
 	/*
 	 Free up as much memory as possible by purging cached data objects that can be recreated (or reloaded from disk) later.
 	 */
 }
 
-void uncaughtExceptionHandler(NSException *exception) {
+void uncaughtExceptionHandler(NSException *exception)
+{
   [Flurry logError:@"Uncaught" message:@"Crash!" exception:exception];
 }
 
-- (void)dealloc {
-	[viewController release];
-	[window release];
-	[super dealloc];
-}
 
 @end

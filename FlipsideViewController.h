@@ -22,18 +22,19 @@
  *
  */
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 
 @protocol FlipsideViewControllerDelegate;
 
 
-@interface FlipsideViewController : UIViewController  <UIWebViewDelegate, UIActionSheetDelegate> {
-	id <FlipsideViewControllerDelegate> delegate;
+@interface FlipsideViewController : UIViewController  <UIWebViewDelegate, UIActionSheetDelegate>
+{
+	id <FlipsideViewControllerDelegate> __weak delegate;
 	IBOutlet UIWebView *myWebView;
 }
 
-@property (nonatomic, assign) id <FlipsideViewControllerDelegate> delegate;
-@property (nonatomic, retain) UIWebView *myWebView;
+@property (nonatomic, weak) id <FlipsideViewControllerDelegate> delegate;
+@property (nonatomic, strong) UIWebView *myWebView;
 - (IBAction)done:(id)sender;
 @end
 

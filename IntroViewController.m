@@ -24,58 +24,36 @@
 
 #import "IntroViewController.h"
 
-
 @implementation IntroViewController
 
 @synthesize delegate;
 @synthesize myWebView;
 
 
-- (void) viewDidLoad {
+- (void) viewDidLoad
+{
 	[super viewDidLoad];
 	[self performSelector:@selector(doneIntro:) withObject:nil afterDelay:60 * 10]; // Timeout and load the main display eventually.
-	
-	//The UIWebView looks a little bit better but takes a LONG time to load.  Switching to a text view for now.
-	/* 
-	CGRect webFrame = [[UIScreen mainScreen] applicationFrame];
-	webFrame.origin.y = 80.0;
-	webFrame.size.height = 340.0;
-	webFrame.size.width =  320.0;	
-	self.myWebView = [[[UIWebView alloc] initWithFrame:webFrame] autorelease];
-	self.myWebView.backgroundColor = [UIColor whiteColor];
-	self.myWebView.scalesPageToFit = NO;
-	self.myWebView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
-	self.myWebView.delegate = self;
-	[self.view addSubview: self.myWebView];
-	NSString *imagePath = [[NSBundle mainBundle] resourcePath];
-	imagePath = [imagePath stringByReplacingOccurrencesOfString:@"/" withString:@"//"];
-	imagePath = [imagePath stringByReplacingOccurrencesOfString:@" " withString:@"%20"];
-	NSString *htmlFile = [[NSBundle mainBundle] pathForResource:@"intro" ofType:@"html"];
-	NSData *htmlData = [NSData dataWithContentsOfFile:htmlFile];
-	[myWebView loadData:htmlData MIMEType:@"text/html" textEncodingName:@"UTF-8" 	baseURL:[NSURL URLWithString: [NSString stringWithFormat:@"file:/%@//",imagePath]]];
-	*/
+	if(!IS_IPHONE_5)
+	{
+		CGRect acceptFrame = CGRectMake(10, 420, 240, 37);
+		[_accept setFrame:acceptFrame];
+	}
 }
 
-
-- (IBAction) doneIntro:(id)sender {
+- (IBAction) doneIntro:(id)sender
+{
 	[self.delegate introViewControllerDidFinish:self];
 	//NSLog(@"Done pressed on the introViewController");
 }
 
-
-- (void) didReceiveMemoryWarning {
+- (void) didReceiveMemoryWarning
+{
 	// Releases the view if it doesn't have a superview.
 	[super didReceiveMemoryWarning];
 }
 
-
-- (void) viewDidUnload {
+- (void) viewDidUnload
+{
 }
-
-
-- (void) dealloc {
-	[super dealloc];
-}
-
-
 @end

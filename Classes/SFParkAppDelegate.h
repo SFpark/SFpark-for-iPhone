@@ -22,21 +22,23 @@
  *
  */
 
-#import <UIKit/UIKit.h>
-#import <CoreLocation/CoreLocation.h>
+@import UIKit;
+@import CoreLocation;
+
 #import "Flurry.h"
 #import "Appirater.h"
 
 
 @class SFParkViewController;
 
-@interface SFParkAppDelegate : NSObject <UIApplicationDelegate> {
+@interface SFParkAppDelegate : NSObject <UIApplicationDelegate>
+{
 	UIWindow *window;
 	SFParkViewController *viewController;
 	NSString * sharedString;
 }
 
-@property (nonatomic, retain) IBOutlet UIWindow *window;
-@property (nonatomic, retain) IBOutlet SFParkViewController *viewController;
+@property (nonatomic, strong) IBOutlet UIWindow *window;
+@property (nonatomic, strong) IBOutlet SFParkViewController *viewController;
 @property (nonatomic, copy) NSString * sharedString;
 @end

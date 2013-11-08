@@ -22,15 +22,16 @@
  *
  */
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 #import "MyAnnotation.h"
 #import "DetailCell.h"
 
 @protocol GarageDetailsViewControllerDelegate;
 
 
-@interface GarageDetailsViewController : UIViewController <UITableViewDelegate, UIWebViewDelegate>{
-	id				<GarageDetailsViewControllerDelegate> delegate;
+@interface GarageDetailsViewController : UIViewController <UITableViewDelegate, UIWebViewDelegate>
+{
+	id				<GarageDetailsViewControllerDelegate> __weak delegate;
 	IBOutlet		UIWebView *myWebView;
 	MyAnnotation	*thisGarage;
 	NSDictionary	*infoDict;
@@ -51,6 +52,7 @@
 	IBOutlet		UILabel			*streetLabel;
 	IBOutlet		UILabel			*streetUse;
 
+	__weak IBOutlet UIButton *backButton;
 	
 	int hoursRows;
 	int ratesRows;
@@ -77,11 +79,13 @@
 	
 	BOOL	onStreetParking;
 	
-
 }
 
 
 - (IBAction)doneWithDetails:(id)sender;
+- (IBAction)handleSwipe:(UISwipeGestureRecognizer *)recognizer;
+//@property(nonatomic) UISwipeGestureRecognizerDirection direction;
+
 - (void)viewAppeared; 
 
 - (NSString*)fixDay:(NSString*)dstr;
@@ -90,9 +94,9 @@
 - (void)parseRates;
 - (void)parseInfo;
 
-@property (nonatomic, assign) id <GarageDetailsViewControllerDelegate> delegate;
-@property (nonatomic, retain) UIWebView *myWebView;
-@property (nonatomic, retain) MyAnnotation* thisGarage;
+@property (nonatomic, weak) id <GarageDetailsViewControllerDelegate> delegate;
+@property (nonatomic, strong) UIWebView *myWebView;
+@property (nonatomic, strong) MyAnnotation* thisGarage;
 
 
 @end

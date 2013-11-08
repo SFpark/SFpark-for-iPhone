@@ -32,15 +32,21 @@
 
 
 NSURL *URL;
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
 	[super viewDidLoad];
-	self.view.backgroundColor = [UIColor viewFlipsideBackgroundColor];
+	self.view.backgroundColor = [UIColor whiteColor];
 	
 	CGRect webFrame = [[UIScreen mainScreen] applicationFrame];
 	webFrame.origin.y = 88.0;
 	webFrame.size.height = 400.0;
-	webFrame.size.width =  320.0;	
-	self.myWebView = [[[UIWebView alloc] initWithFrame:webFrame] autorelease];
+	webFrame.size.width =  320.0;
+	if (IS_IPHONE_5)
+	{
+		int iphone5heightaddition = 176;
+		webFrame.size.height += iphone5heightaddition;
+	}
+	self.myWebView = [[UIWebView alloc] initWithFrame:webFrame];
 	self.myWebView.backgroundColor = [UIColor whiteColor];
 	self.myWebView.scalesPageToFit = NO;
 	//self.myWebView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
@@ -56,10 +62,13 @@ NSURL *URL;
 }
 
 //Handle user clicks on the links on this page.
-- (BOOL)webView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType {
-	if (navigationType == UIWebViewNavigationTypeLinkClicked) {
+- (BOOL)webView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType
+{
+	if (navigationType == UIWebViewNavigationTypeLinkClicked)
+	{
 		URL = [request URL];	
-		if ([[URL scheme] isEqualToString:@"http"] || [[URL scheme] isEqualToString:@"https"] ) {
+		if ([[URL scheme] isEqualToString:@"http"] || [[URL scheme] isEqualToString:@"https"] )
+		{
 			
 			UIActionSheet *sheet =
 			[[UIActionSheet alloc] initWithTitle:@"Visit this website in Safari?"
@@ -69,8 +78,7 @@ NSURL *URL;
                                otherButtonTitles:@"Yes",
 			 nil];
 			[sheet showInView:self.view];
-			[sheet release];
-			[URL retain];
+
 		}	 
 		return NO;
 	}	
@@ -78,9 +86,12 @@ NSURL *URL;
 }
 
 //Launch the specifcied URL in Safari if the user selects to do so.
-- (void)actionSheet:(UIActionSheet *)actionSheet willDismissWithButtonIndex:(NSInteger)buttonIndex {
-	switch (buttonIndex) {
-		case 0: {
+- (void)actionSheet:(UIActionSheet *)actionSheet willDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+	switch (buttonIndex)
+	{
+		case 0:
+		{
 			[[UIApplication sharedApplication] openURL:URL];
 		} break;
 		default:
@@ -88,39 +99,33 @@ NSURL *URL;
 	}
 }
 
-- (IBAction)done:(id)sender {
+- (IBAction)done:(id)sender
+{
 	[self.delegate flipsideViewControllerDidFinish:self];
 }
 
-
-- (void)didReceiveMemoryWarning {
+- (void)didReceiveMemoryWarning
+{
 	// Releases the view if it doesn't have a superview.
 	[super didReceiveMemoryWarning];
 	
 	// Release any cached data, images, etc that aren't in use.
 }
 
-
-- (void)viewDidUnload {
+- (void)viewDidUnload
+{
 	// Release any retained subviews of the main view.
 	// e.g. self.myOutlet = nil;
 }
 
-
 /*
  // Override to allow orientations other than the default portrait orientation.
- - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+ - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation 
+ {
  // Return YES for supported orientations
  return (interfaceOrientation == UIInterfaceOrientationPortrait);
  //return YES;
  }
  */
-
-
-- (void)dealloc {
-	[URL release];
-	[super dealloc];
-}
-
 
 @end

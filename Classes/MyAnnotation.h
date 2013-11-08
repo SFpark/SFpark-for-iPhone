@@ -22,10 +22,11 @@
  *
  */
 
-#import <Foundation/Foundation.h>
-#import <MapKit/MapKit.h>
+@import Foundation;
+@import	MapKit;
 
-@interface MyAnnotation : NSObject<MKAnnotation> {
+@interface MyAnnotation : NSObject<MKAnnotation>
+{
 	
 	CLLocationCoordinate2D	coordinate;
 	NSString*				title;
@@ -48,15 +49,14 @@
 
 @property (nonatomic, assign)	CLLocationCoordinate2D	coordinate;
 
-@property (nonatomic, retain)	NSDate*                 timeStamp;
-@property (nonatomic, retain)	NSDictionary*           allGarageData;
+@property (nonatomic, strong)	NSDate*                 timeStamp;
+@property (nonatomic, strong)	NSDictionary*           allGarageData;
 
 @property (nonatomic, copy)		NSString*               type;
 @property (nonatomic, copy)		NSString*				title;
 @property (nonatomic, copy)		NSString*				subtitle;
 @property (nonatomic, copy)		NSString*               uniqueID;
 @property (nonatomic, copy)		NSString*               rateQualifier;
-
 
 - (UIColor *)   bucketFinder:                       (float) price;
 - (int)         iconFinder:                         (BOOL)showPrice;

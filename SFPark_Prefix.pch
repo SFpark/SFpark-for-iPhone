@@ -27,6 +27,9 @@
 //
 
 #ifdef __OBJC__
-    #import <Foundation/Foundation.h>
-    #import <UIKit/UIKit.h>
+@import	Foundation;
+@import	UIKit;
 #endif
+
+
+#define IS_IPHONE_5 ([[UIScreen mainScreen]bounds].size.height == 568)

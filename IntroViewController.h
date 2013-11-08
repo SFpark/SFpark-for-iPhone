@@ -22,26 +22,25 @@
  *
  */
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 
 @protocol IntroViewControllerDelegate;
 
 
-@interface IntroViewController : UIViewController <UIWebViewDelegate> {
-	id <IntroViewControllerDelegate> delegate;
-	IBOutlet UIWebView *myWebView;
+@interface IntroViewController : UIViewController
+{
+	id <IntroViewControllerDelegate> __weak delegate;
 
 }
 
-@property (nonatomic, assign) id <IntroViewControllerDelegate> delegate;
-@property (nonatomic, retain) UIWebView *myWebView;
+@property (nonatomic, weak) id <IntroViewControllerDelegate> delegate;
+@property (nonatomic, strong) UIWebView *myWebView;
 
 - (IBAction)doneIntro:(id)sender;
 
+@property (weak, nonatomic) IBOutlet UIButton *accept;
 @end
-
 
 @protocol IntroViewControllerDelegate
 - (void)introViewControllerDidFinish:(IntroViewController *)controller;
 @end
-

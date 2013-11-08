@@ -22,14 +22,15 @@
  *
  */
 
-#import <Foundation/Foundation.h>
-#import <MapKit/MapKit.h>
-#import <UIKit/UIKit.h>
+@import Foundation;
+@import UIKit;
+@import MapKit;
 
-@interface MyPolyline : MKPolyline{
+@interface MyPolyline : MKPolyline
+{
     UIColor *lineColor;
 }
 
-@property (nonatomic, retain) UIColor * lineColor;
+@property (nonatomic, strong) UIColor * lineColor;
 
 @end
